@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Emotion Analysis</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f8fbff 50%, #edf3ff 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 30px 16px;
+        }
+
+        .container {
+            max-width: 1020px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid #e5ecf8;
+            border-radius: 22px;
+            box-shadow: 0 18px 45px rgba(18, 86, 188, 0.12);
+            overflow: hidden;
+        }
+
+        .top-section {
+            padding: 30px 30px 20px;
+            background: linear-gradient(135deg, #1256bc 0%, #1b6de0 100%);
+            color: #fff;
+        }
+
+        .top-section h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .top-section p {
+            margin: 10px 0 0;
+            font-size: 15px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 28px 30px 30px;
+        }
+
+        .input-card,
+        .result-card,
+        .feedback-card {
+            background: #ffffff;
+            border: 1px solid #e4ebf7;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .input-card {
+            margin-bottom: 22px;
+        }
+
+        .result-card,
+        .feedback-card {
+            margin-top: 22px;
+        }
+
+        .section-title {
+            margin: 0 0 16px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1256bc;
+        }
+
+        .language-box,
+        .feedback-group {
+            margin-bottom: 18px;
+        }
+
+        .language-box label,
+        .feedback-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .language-box select,
+        .feedback-group select,
+        .feedback-group input,
+        .feedback-group textarea {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d9e4f5;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #f9fbff;
+            color: #1f2937;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .language-box select:focus,
+        .feedback-group select:focus,
+        .feedback-group input:focus,
+        .feedback-group textarea:focus,
+        textarea:focus {
+            border-color: #1256bc;
+            box-shadow: 0 0 0 4px rgba(18, 86, 188, 0.12);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 170px;
+            padding: 16px;
+            border: 1px solid #d9e4f5;
+            border-radius: 14px;
+            font-size: 15px;
+            resize: vertical;
+            margin-bottom: 18px;
+            background: #f9fbff;
+            color: #1f2937;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            line-height: 1.6;
+        }
+
+        .feedback-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-action-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #1256bc 0%, #0d47a1 100%);
+            color: white;
+            border: none;
+            padding: 14px 26px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 22px rgba(18, 86, 188, 0.2);
+            min-width: 220px;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(18, 86, 188, 0.26);
+        }
+
+        #recommendBtn {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            box-shadow: 0 10px 22px rgba(22, 163, 74, 0.2);
+        }
+
+        #recommendBtn:hover {
+            box-shadow: 0 12px 24px rgba(22, 163, 74, 0.26);
+        }
+
+        .loading {
+            margin-top: 18px;
+            color: #1256bc;
+            font-weight: 700;
+            display: none;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .error {
+            margin-top: 16px;
+            color: #dc2626;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .success-msg {
+            margin-top: 14px;
+            color: #16a34a;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result-header h3 {
+            margin: 0 0 16px;
+            color: #1256bc;
+            font-size: 20px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 0;
+        }
+
+        .result-item {
+            background: #f8fbff;
+            border: 1px solid #dce7f8;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .result-item .label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .result-item .value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1f2937;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .songs-section {
+            margin-top: 18px;
+        }
+
+        .songs-section h3 {
+            margin: 0 0 14px;
+            color: #1256bc;
+            font-size: 18px;
+        }
+
+        .songs {
+            display: grid;
+            gap: 14px;
+        }
+
+        .song-card {
+            padding: 16px;
+            border: 1px solid #dde7f7;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.03);
+        }
+
+        .song-card p {
+            margin: 8px 0;
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .song-card a {
+            color: #1256bc;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .song-card a:hover {
+            text-decoration: underline;
+        }
+
+        .no-data {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .top-section {
+                padding: 24px 20px 16px;
+            }
+
+            .content {
+                padding: 22px 20px 24px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .top-section h2 {
+                font-size: 23px;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .action-row,
+            .feedback-action-row {
+                display: block;
+            }
+
+            .action-row button {
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <h2 id="mainTitle">Text Emotion Analysis</h2>
+            <p id="subText">Analyze the emotion in your text and get suitable music recommendations through a clean and professional interface.</p>
+        </div>
+
+        <div class="content">
+            <div class="input-card">
+                <h3 class="section-title" id="inputSectionTitle">Enter Text</h3>
+
+                <div class="language-box">
+                    <label for="languageSelect" id="languageLabel">Select Text Language</label>
+                    <select id="languageSelect" onchange="changeLanguage()">
+                        <option value="en">English</option>
+                        <option value="si">සිංහල</option>
+                        <option value="ta">தமிழ்</option>
+                    </select>
+                </div>
+
+                <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+
+                <div class="action-row">
+                    <button id="detectBtn" onclick="detectEmotionOnly()">Detect Emotion</button>
+                    <button id="recommendBtn" onclick="getRecommendations()">Get Recommendation</button>
+                </div>
+
+                <div class="loading" id="loading">Analyzing emotion...</div>
+                <div class="error" id="errorMsg"></div>
+            </div>
+
+            <div class="result result-card" id="resultBox">
+                <div class="result-header">
+                    <h3 id="predictionTitle">Prediction Result</h3>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        <span class="label" id="emotionLabel">Emotion:</span>
+                        <span class="value" id="emotion" data-emotion-key=""></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label" id="confidenceLabel">Confidence:</span>
+                        <span class="value" id="probability"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label" id="descriptionLabel">Description:</span>
+                        <span class="value" id="description"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result result-card" id="recommendationResultBox" style="display: none;">
+                <div class="songs-section">
+                    <h3 id="musicTitle">Music Recommendations</h3>
+                    <div class="songs" id="recommendations"></div>
+                </div>
+            </div>
+
+            <div class="feedback-card">
+                <h3 class="section-title" id="feedbackTitle">User Feedback</h3>
+
+                <div class="feedback-group">
+                    <label for="feedbackRating" id="feedbackRatingLabel">Rate Your Experience</label>
+                    <select id="feedbackRating">
+                        <option value="">Select rating</option>
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="3">3 - Good</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="1">1 - Poor</option>
+                    </select>
+                </div>
+
+                <div class="feedback-group">
+                    <label for="feedbackText" id="feedbackTextLabel">Your Feedback</label>
+                    <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                </div>
+
+                <div class="feedback-action-row">
+                    <button id="feedbackBtn" onclick="submitFeedback()">Submit Feedback</button>
+                </div>
+
+                <div class="error" id="feedbackError"></div>
+                <div class="success-msg" id="feedbackSuccess"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                mainTitle: "Text Emotion Analysis",
+                subText: "Analyze the emotion in your text and get suitable music recommendations through a clean and professional interface.",
+                inputSectionTitle: "Enter Text",
+                languageLabel: "Select Text Language",
+                placeholder: "Enter your text here...",
+                detectBtn: "Detect Emotion",
+                recommendBtn: "Get Recommendation",
+                loading: "Analyzing emotion...",
+                predictionTitle: "Prediction Result",
+                emotionLabel: "Emotion:",
+                confidenceLabel: "Confidence:",
+                descriptionLabel: "Description:",
+                musicTitle: "Music Recommendations",
+                emptyText: "Please enter some text.",
+                somethingWrong: "Something went wrong.",
+                noRecommendations: "No recommendations found.",
+                clickRecommendation: 'Click "Get Recommendation" to view music suggestions.',
+                failedConnection: "Failed to connect to server.",
+                title: "Title:",
+                channelArtist: "Channel/Artist:",
+                artist: "Artist:",
+                genre: "Genre:",
+                feedbackTitle: "User Feedback",
+                feedbackRatingLabel: "Rate Your Experience",
+                feedbackTextLabel: "Your Feedback",
+                feedbackPlaceholder: "Write your feedback here...",
+                feedbackBtn: "Submit Feedback",
+                selectRating: "Select rating",
+                feedbackEmpty: "Please select a rating and enter your feedback.",
+                feedbackSuccess: "Thank you! Your feedback has been submitted successfully.",
+                feedbackFailed: "Failed to submit feedback.",
+                ratingOptions: [
+                    "5 - Excellent",
+                    "4 - Very Good",
+                    "3 - Good",
+                    "2 - Fair",
+                    "1 - Poor"
+                ]
+            },
+            si: {
+                mainTitle: "පෙළ හැඟීම් විශ්ලේෂණය",
+                subText: "ඔබ ඇතුළත් කරන පෙළේ හැඟීම විශ්ලේෂණය කර, ගැළපෙන සංගීත නිර්දේශ ලබාගන්න.",
+                inputSectionTitle: "පෙළ ඇතුළත් කරන්න",
+                languageLabel: "පෙළ භාෂාව තෝරන්න",
+                placeholder: "ඔබගේ පෙළ මෙහි ඇතුළත් කරන්න...",
+                detectBtn: "හැඟීම හඳුනාගන්න",
+                recommendBtn: "නිර්දේශ ලබාගන්න",
+                loading: "හැඟීම විශ්ලේෂණය කරමින්...",
+                predictionTitle: "ප්‍රතිඵලය",
+                emotionLabel: "හැඟීම:",
+                confidenceLabel: "විශ්වාස මට්ටම:",
+                descriptionLabel: "විස්තරය:",
+                musicTitle: "සංගීත නිර්දේශ",
+                emptyText: "කරුණාකර පෙළක් ඇතුළත් කරන්න.",
+                somethingWrong: "යම් දෝෂයක් ඇතිවිය.",
+                noRecommendations: "නිර්දේශ කිසිවක් හමු නොවීය.",
+                clickRecommendation: '"නිර්දේශ ලබාගන්න" ඔබා ගීත නිර්දේශ බලන්න.',
+                failedConnection: "සේවාදායකයට සම්බන්ධ වීමට අසමත් විය.",
+                title: "ශීර්ෂය:",
+                channelArtist: "චැනලය/කලාකරු:",
+                artist: "කලාකරු:",
+                genre: "ප්‍රභේදය:",
+                feedbackTitle: "පරිශීලක අදහස්",
+                feedbackRatingLabel: "ඔබගේ අත්දැකීම අගය කරන්න",
+                feedbackTextLabel: "ඔබගේ අදහස්",
+                feedbackPlaceholder: "ඔබගේ අදහස් මෙහි ලියන්න...",
+                feedbackBtn: "අදහස් යවන්න",
+                selectRating: "අගය කිරීම තෝරන්න",
+                feedbackEmpty: "කරුණාකර අගය කිරීමක් තෝරා අදහස් ඇතුළත් කරන්න.",
+                feedbackSuccess: "ස්තූතියි! ඔබගේ අදහස් සාර්ථකව යවා ඇත.",
+                feedbackFailed: "අදහස් යැවීමට අසමත් විය.",
+                ratingOptions: [
+                    "5 - විශිෂ්ටයි",
+                    "4 - ඉතා හොඳයි",
+                    "3 - හොඳයි",
+                    "2 - සාමාන්‍යයි",
+                    "1 - දුර්වලයි"
+                ]
+            },
+            ta: {
+                mainTitle: "உரை உணர்வு பகுப்பாய்வு",
+                subText: "உங்கள் உரையின் உணர்வை பகுப்பாய்வு செய்து, பொருத்தமான இசை பரிந்துரைகளை பெறுங்கள்.",
+                inputSectionTitle: "உரையை உள்ளிடவும்",
+                languageLabel: "உரை மொழியை தேர்ந்தெடுக்கவும்",
+                placeholder: "உங்கள் உரையை இங்கே உள்ளிடவும்...",
+                detectBtn: "உணர்வை கண்டறி",
+                recommendBtn: "பரிந்துரையை பெறுங்கள்",
+                loading: "உணர்வு பகுப்பாய்வு செய்யப்படுகிறது...",
+                predictionTitle: "முடிவு",
+                emotionLabel: "உணர்வு:",
+                confidenceLabel: "நம்பிக்கை அளவு:",
+                descriptionLabel: "விளக்கம்:",
+                musicTitle: "இசை பரிந்துரைகள்",
+                emptyText: "தயவுசெய்து ஒரு உரையை உள்ளிடவும்.",
+                somethingWrong: "ஏதோ தவறு ஏற்பட்டது.",
+                noRecommendations: "பரிந்துரைகள் எதுவும் கிடைக்கவில்லை.",
+                clickRecommendation: '"பரிந்துரையை பெறுங்கள்" என்பதை அழுத்தி இசை பரிந்துரைகளை பாருங்கள்.',
+                failedConnection: "சேவையகத்துடன் இணைக்க முடியவில்லை.",
+                title: "தலைப்பு:",
+                channelArtist: "சேனல்/கலைஞர்:",
+                artist: "கலைஞர்:",
+                genre: "வகை:",
+                feedbackTitle: "பயனர் கருத்து",
+                feedbackRatingLabel: "உங்கள் அனுபவத்தை மதிப்பிடுங்கள்",
+                feedbackTextLabel: "உங்கள் கருத்து",
+                feedbackPlaceholder: "உங்கள் கருத்தை இங்கே எழுதுங்கள்...",
+                feedbackBtn: "கருத்தை சமர்ப்பிக்கவும்",
+                selectRating: "மதிப்பீட்டை தேர்ந்தெடுக்கவும்",
+                feedbackEmpty: "தயவுசெய்து மதிப்பீடும் கருத்தும் வழங்கவும்.",
+                feedbackSuccess: "நன்றி! உங்கள் கருத்து வெற்றிகரமாக அனுப்பப்பட்டது.",
+                feedbackFailed: "கருத்தை அனுப்ப முடியவில்லை.",
+                ratingOptions: [
+                    "5 - சிறந்தது",
+                    "4 - மிகவும் நல்லது",
+                    "3 - நல்லது",
+                    "2 - சாதாரணம்",
+                    "1 - மோசம்"
+                ]
+            }
+        };
+
+        function getCurrentLanguage() {
+            return document.getElementById("languageSelect").value;
+        }
+
+        function updateRatingOptions(lang) {
+            const t = translations[lang];
+            const ratingSelect = document.getElementById("feedbackRating");
+
+            ratingSelect.innerHTML = `
+                <option value="">${t.selectRating}</option>
+                <option value="5">${t.ratingOptions[0]}</option>
+                <option value="4">${t.ratingOptions[1]}</option>
+                <option value="3">${t.ratingOptions[2]}</option>
+                <option value="2">${t.ratingOptions[3]}</option>
+                <option value="1">${t.ratingOptions[4]}</option>
+            `;
+        }
+
+        function changeLanguage() {
+            const lang = getCurrentLanguage();
+            const t = translations[lang];
+
+            document.getElementById("mainTitle").textContent = t.mainTitle;
+            document.getElementById("subText").textContent = t.subText;
+            document.getElementById("inputSectionTitle").textContent = t.inputSectionTitle;
+            document.getElementById("languageLabel").textContent = t.languageLabel;
+            document.getElementById("textInput").placeholder = t.placeholder;
+            document.getElementById("detectBtn").textContent = t.detectBtn;
+            document.getElementById("recommendBtn").textContent = t.recommendBtn;
+            document.getElementById("loading").textContent = t.loading;
+            document.getElementById("predictionTitle").textContent = t.predictionTitle;
+            document.getElementById("emotionLabel").textContent = t.emotionLabel;
+            document.getElementById("confidenceLabel").textContent = t.confidenceLabel;
+            document.getElementById("descriptionLabel").textContent = t.descriptionLabel;
+            document.getElementById("musicTitle").textContent = t.musicTitle;
+            document.getElementById("feedbackTitle").textContent = t.feedbackTitle;
+            document.getElementById("feedbackRatingLabel").textContent = t.feedbackRatingLabel;
+            document.getElementById("feedbackTextLabel").textContent = t.feedbackTextLabel;
+            document.getElementById("feedbackText").placeholder = t.feedbackPlaceholder;
+            document.getElementById("feedbackBtn").textContent = t.feedbackBtn;
+
+            updateRatingOptions(lang);
+        }
+
+        function clearUI() {
+            document.getElementById("errorMsg").textContent = "";
+            document.getElementById("recommendations").innerHTML = "";
+            document.getElementById("resultBox").style.display = "none";
+            document.getElementById("recommendationResultBox").style.display = "none";
+        }
+
+        function setResultData(data, showRecommendations = true) {
+            const lang = getCurrentLanguage();
+            const t = translations[lang];
+            const recommendationsDiv = document.getElementById("recommendations");
+            const emotionValue = data.emotion || "-";
+
+            document.getElementById("emotion").textContent = emotionValue;
+            document.getElementById("emotion").dataset.emotionKey = emotionValue;
+            document.getElementById("probability").textContent = data.probability || "-";
+            document.getElementById("description").textContent = data.description || "-";
+
+            recommendationsDiv.innerHTML = "";
+            document.getElementById("resultBox").style.display = "block";
+
+            if (showRecommendations) {
+                if (data.recommendations && data.recommendations.length > 0) {
+                    data.recommendations.forEach(song => {
+                        const songCard = document.createElement("div");
+                        songCard.className = "song-card";
+
+                        if (song.url && song.url !== "#") {
+                            songCard.innerHTML = `
+                                <p><strong>${t.title}</strong> <a href="${song.url}" target="_blank" rel="noopener noreferrer">${song.title}</a></p>
+                                <p><strong>${t.channelArtist}</strong> ${song.channel || song.artist || "Unknown"}</p>
+                            `;
+                        } else {
+                            songCard.innerHTML = `
+                                <p><strong>${t.title}</strong> ${song.title || "Unknown"}</p>
+                                <p><strong>${t.artist}</strong> ${song.artist || song.channel || "Unknown"}</p>
+                                <p><strong>${t.genre}</strong> ${song.genre || "Unknown"}</p>
+                            `;
+                        }
+
+                        recommendationsDiv.appendChild(songCard);
+                    });
+                } else {
+                    recommendationsDiv.innerHTML = `<p class="no-data">${t.noRecommendations}</p>`;
+                }
+
+                document.getElementById("recommendationResultBox").style.display = "block";
+            } else {
+                recommendationsDiv.innerHTML = `<p class="no-data">${t.clickRecommendation}</p>`;
+                document.getElementById("recommendationResultBox").style.display = "block";
+            }
+        }
+
+        async function callEmotionApi(showRecommendations = true) {
+            const lang = getCurrentLanguage();
+            const t = translations[lang];
+            const text = document.getElementById("textInput").value.trim();
+            const errorMsg = document.getElementById("errorMsg");
+            const loading = document.getElementById("loading");
+
+            clearUI();
+
+            if (!text) {
+                errorMsg.textContent = t.emptyText;
+                return;
+            }
+
+            loading.style.display = "block";
+
+            try {
+                const response = await fetch("/detect_emotion", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        language: lang,
+                        recommend: showRecommendations
+                    })
+                });
+
+                const data = await response.json();
+                loading.style.display = "none";
+
+                if (!response.ok) {
+                    errorMsg.textContent = data.error || t.somethingWrong;
+                    return;
+                }
+
+                setResultData(data, showRecommendations);
+
+            } catch (error) {
+                loading.style.display = "none";
+                errorMsg.textContent = t.failedConnection;
+                console.error(error);
+            }
+        }
+
+        async function detectEmotionOnly() {
+            await callEmotionApi(false);
+        }
+
+        async function getRecommendations() {
+            await callEmotionApi(true);
+        }
+
+        async function submitFeedback() {
+            const lang = getCurrentLanguage();
+            const t = translations[lang];
+
+            const rating = document.getElementById("feedbackRating").value;
+            const feedback = document.getElementById("feedbackText").value.trim();
+            const feedbackError = document.getElementById("feedbackError");
+            const feedbackSuccess = document.getElementById("feedbackSuccess");
+            const detectedEmotion = document.getElementById("emotion").dataset.emotionKey || document.getElementById("emotion").textContent.trim();
+
+            feedbackError.textContent = "";
+            feedbackSuccess.textContent = "";
+
+            if (!rating || !feedback) {
+                feedbackError.textContent = t.feedbackEmpty;
+                return;
+            }
+
+            try {
+                const response = await fetch("/submit_feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        rating: rating,
+                        feedback: feedback,
+                        language: lang,
+                        emotion: detectedEmotion,
+                        module: "text_emotion_analysis"
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    feedbackError.textContent = data.error || t.feedbackFailed;
+                    return;
+                }
+
+                feedbackSuccess.textContent = t.feedbackSuccess;
+                document.getElementById("feedbackRating").value = "";
+                document.getElementById("feedbackText").value = "";
+            } catch (error) {
+                feedbackError.textContent = t.feedbackFailed;
+                console.error(error);
+            }
+        }
+
+        changeLanguage();
+    </script>
+</body>
+</html>

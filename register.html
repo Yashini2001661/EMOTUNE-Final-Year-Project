@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMOTUNE | Register</title>
+  <link rel="stylesheet" href="../../css/auth.css" />
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-left">
+      <div class="brand">
+        <div class="brand-logo">🎵</div>
+        <h1>EMOTUNE</h1>
+      </div>
+
+      <h2 class="hero-title">Create your EMOTUNE account.</h2>
+      <p class="hero-text">
+        Join EMOTUNE and get personalized music recommendations based on your emotions.
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <h3>Smart Recommendations</h3>
+          <p>Get playlists that match your current mood.</p>
+        </div>
+        <div class="feature-item">
+          <h3>Fast Registration</h3>
+          <p>Create your account in just a few steps.</p>
+        </div>
+        <div class="feature-item">
+          <h3>Private Experience</h3>
+          <p>Your profile and preferences stay secure.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="form-card">
+        <div class="form-header">
+          <h2>Create Account</h2>
+          <p>Register to start your EMOTUNE journey.</p>
+        </div>
+
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <form id="registerForm" class="form-section active">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input
+              type="text"
+              id="fullName"
+              class="form-control"
+              placeholder="Enter your full name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="registerEmail">Email Address</label>
+            <input
+              type="email"
+              id="registerEmail"
+              class="form-control"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="registerPassword">Password</label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="registerPassword"
+                class="form-control"
+                placeholder="Create a password"
+                required
+              />
+              <span class="toggle-password" data-target="registerPassword">Show</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="confirmPassword"
+                class="form-control"
+                placeholder="Confirm your password"
+                required
+              />
+              <span class="toggle-password" data-target="confirmPassword">Show</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Create Account</button>
+
+          <p class="bottom-text">
+            Already have an account?
+            <a href="auth.html">Login here</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const toggles = document.querySelectorAll(".toggle-password");
+
+    toggles.forEach(toggle => {
+      toggle.addEventListener("click", () => {
+        const target = document.getElementById(toggle.dataset.target);
+
+        if (target.type === "password") {
+          target.type = "text";
+          toggle.textContent = "Hide";
+        } else {
+          target.type = "password";
+          toggle.textContent = "Show";
+        }
+      });
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const password = document.getElementById("registerPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const statusMessage = document.getElementById("statusMessage");
+
+      if (password !== confirmPassword) {
+        statusMessage.textContent = "Passwords do not match.";
+        statusMessage.style.display = "block";
+        return;
+      }
+
+      statusMessage.textContent = "Registration form submitted successfully.";
+      statusMessage.style.display = "block";
+    });
+  </script>
+</body>
+</html>

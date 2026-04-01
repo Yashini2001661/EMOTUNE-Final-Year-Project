@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMOTUNE | Login</title>
+  <link rel="stylesheet" href="../../css/auth.css" />
+  <style>
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .google-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-message {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .info-message {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .status-message {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-left">
+      <div class="brand">
+        <div class="brand-logo">🎵</div>
+        <h1>EMOTUNE</h1>
+      </div>
+
+      <h2 class="hero-title">Welcome to a smarter way to discover music.</h2>
+      <p class="hero-text">
+        Sign in to enjoy emotion-based music recommendations
+        through voice, face, and text analysis.
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <h3>Emotion-Based Recommendations</h3>
+          <p>Music suggestions that match how you feel.</p>
+        </div>
+        <div class="feature-item">
+          <h3>Secure Access</h3>
+          <p>Use your email or continue with Google.</p>
+        </div>
+        <div class="feature-item">
+          <h3>Personal Settings</h3>
+          <p>Save your preferences and profile data.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="form-card">
+        <div class="form-header">
+          <h2>Login to Your Account</h2>
+          <p>Access your EMOTUNE dashboard.</p>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <form id="loginForm" class="form-section active">
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              class="form-control"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                class="form-control"
+                placeholder="Enter your password"
+                required
+              />
+              <span class="toggle-password" data-target="loginPassword">Show</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">LogIn</button>
+
+          <div class="divider">OR</div>
+
+          <button type="button" id="googleLoginBtn" class="btn google-btn">
+            <span class="google-icon">
+              <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.74 1.22 9.25 3.6l6.9-6.9C35.96 2.3 30.37 0 24 0 14.62 0 6.51 5.38 2.56 13.22l8.04 6.24C12.48 13.36 17.76 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.5 24.55c0-1.64-.15-3.2-.41-4.73H24v8.95h12.68c-.55 2.96-2.23 5.48-4.76 7.17l7.34 5.7c4.29-3.95 6.74-9.77 6.74-17.09z"/>
+                <path fill="#FBBC05" d="M10.6 28.54a14.6 14.6 0 0 1 0-9.08l-8.04-6.24a24.02 24.02 0 0 0 0 21.56l8.04-6.24z"/>
+                <path fill="#34A853" d="M24 48c6.37 0 11.72-2.1 15.63-5.73l-7.34-5.7c-2.04 1.37-4.66 2.18-8.29 2.18-6.24 0-11.52-3.86-13.4-9.96l-8.04 6.24C6.51 42.62 14.62 48 24 48z"/>
+              </svg>
+            </span>
+            <span>Continue with Google</span>
+          </button>
+
+          <p class="bottom-text">
+            Don’t have an account?
+            <a href="register.html">Create one here</a>
+          </p>
+
+          <p class="bottom-text">
+            Forgot your password?
+            <a href="reset.html">Reset here</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged,
+      getAdditionalUserInfo,
+      deleteUser,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaOwvPWZoY9C_hs9UTGGHBnNmMVVFu2ig",
+      authDomain: "my-fyp-57230.firebaseapp.com",
+      projectId: "my-fyp-57230",
+      storageBucket: "my-fyp-57230.firebasestorage.app",
+      messagingSenderId: "20267224074",
+      appId: "1:20267224074:web:293ea1063532e95e64e3f3",
+      measurementId: "G-6RV2P6GH4S"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    provider.setCustomParameters({
+      prompt: "select_account"
+    });
+
+    const statusMessage = document.getElementById("statusMessage");
+    const loginForm = document.getElementById("loginForm");
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const toggles = document.querySelectorAll(".toggle-password");
+
+    function showMessage(message, type = "info") {
+      statusMessage.textContent = message;
+      statusMessage.style.display = "block";
+      statusMessage.classList.remove("success-message", "error-message", "info-message");
+
+      if (type === "success") {
+        statusMessage.classList.add("success-message");
+      } else if (type === "error") {
+        statusMessage.classList.add("error-message");
+      } else {
+        statusMessage.classList.add("info-message");
+      }
+    }
+
+    function redirectToHome() {
+      window.location.href = "index.html";
+    }
+
+    toggles.forEach(toggle => {
+      toggle.addEventListener("click", () => {
+        const target = document.getElementById(toggle.dataset.target);
+
+        if (target.type === "password") {
+          target.type = "text";
+          toggle.textContent = "Hide";
+        } else {
+          target.type = "password";
+          toggle.textContent = "Show";
+        }
+      });
+    });
+
+    loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (!email || !password) {
+        showMessage("Please enter your email and password.", "error");
+        return;
+      }
+
+      try {
+        showMessage("Signing in...", "info");
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        showMessage(`Welcome back, ${user.email}`, "success");
+
+        setTimeout(() => {
+          redirectToHome();
+        }, 1000);
+      } catch (error) {
+        let message = "Login failed. Please try again.";
+
+        if (error.code === "auth/invalid-credential") {
+          message = "Invalid email or password.";
+        } else if (error.code === "auth/user-not-found") {
+          message = "No account found for this email.";
+        } else if (error.code === "auth/wrong-password") {
+          message = "Incorrect password.";
+        } else if (error.code === "auth/invalid-email") {
+          message = "Invalid email address.";
+        } else if (error.code === "auth/too-many-requests") {
+          message = "Too many attempts. Please try again later.";
+        } else if (error.code === "auth/network-request-failed") {
+          message = "Network error. Check your internet connection.";
+        }
+
+        showMessage(message, "error");
+        console.error("Email login error:", error);
+      }
+    });
+
+    googleLoginBtn.addEventListener("click", async function () {
+      try {
+        showMessage("Opening Google sign-in...", "info");
+
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const additionalInfo = getAdditionalUserInfo(result);
+
+        if (additionalInfo && additionalInfo.isNewUser) {
+          await deleteUser(user);
+          await signOut(auth);
+
+          showMessage(
+            "This Google account is not pre-added to the system. Please use a Firebase-added account.",
+            "error"
+          );
+          return;
+        }
+
+        showMessage(`Signed in as ${user.displayName || user.email}`, "success");
+
+        setTimeout(() => {
+          redirectToHome();
+        }, 1000);
+      } catch (error) {
+        let message = "Google sign-in failed.";
+
+        if (error.code === "auth/popup-closed-by-user") {
+          message = "Google sign-in popup was closed.";
+        } else if (error.code === "auth/cancelled-popup-request") {
+          message = "Google sign-in was cancelled.";
+        } else if (error.code === "auth/popup-blocked") {
+          message = "Popup blocked by browser. Please allow popups.";
+        } else if (error.code === "auth/unauthorized-domain") {
+          message = "This domain is not authorized in Firebase.";
+        } else if (error.code === "auth/operation-not-allowed") {
+          message = "Google sign-in is not enabled in Firebase console.";
+        } else if (error.code === "auth/account-exists-with-different-credential") {
+          message = "This email already exists with another sign-in method. Log in with email/password first.";
+        } else if (error.code === "auth/network-request-failed") {
+          message = "Network error. Check your internet connection.";
+        }
+
+        showMessage(message, "error");
+        console.error("Google login error:", error);
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User already signed in:", user.email);
+      }
+    });
+  </script>
+</body>
+</html>

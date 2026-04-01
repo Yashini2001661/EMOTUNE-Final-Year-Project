@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voice Emotion Recognition</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f8fbff 50%, #edf3ff 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 30px 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid #e5ecf8;
+            border-radius: 22px;
+            box-shadow: 0 18px 45px rgba(18, 86, 188, 0.12);
+            overflow: hidden;
+        }
+
+        .top-section {
+            padding: 30px 30px 20px;
+            background: linear-gradient(135deg, #1256bc 0%, #1b6de0 100%);
+            color: #fff;
+        }
+
+        .top-section h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .top-section p {
+            margin: 10px 0 0;
+            font-size: 15px;
+            line-height: 1.6;
+            opacity: 0.95;
+            max-width: 850px;
+        }
+
+        .content {
+            padding: 28px 30px 30px;
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 22px;
+        }
+
+        .input-card,
+        .result-panel,
+        .feedback-panel {
+            background: #ffffff;
+            border: 1px solid #e4ebf7;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .feedback-panel {
+            margin-top: 22px;
+        }
+
+        .section-title {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1256bc;
+        }
+
+        .section-subtitle {
+            margin: 0 0 18px;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .option-box {
+            background: #f8fbff;
+            border: 1px solid #dce7f8;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .option-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .option-box h4 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            color: #1f2937;
+        }
+
+        .option-box p {
+            margin: 0 0 14px;
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .file-input,
+        .feedback-select,
+        .feedback-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d9e4f5;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .feedback-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-input:focus,
+        .feedback-select:focus,
+        .feedback-textarea:focus {
+            border-color: #1256bc;
+            box-shadow: 0 0 0 4px rgba(18, 86, 188, 0.12);
+        }
+
+        .feedback-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 13px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1256bc 0%, #0d47a1 100%);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(18, 86, 188, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(18, 86, 188, 0.26);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(22, 163, 74, 0.18);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.18);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #eef4ff;
+            color: #1256bc;
+            border: 1px solid #c8dafb;
+        }
+
+        .btn-secondary:hover {
+            background: #e2edff;
+        }
+
+        .status-box {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status-info {
+            display: block;
+            background: #eff6ff;
+            color: #1256bc;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-success {
+            display: block;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-error {
+            display: block;
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .status-warning {
+            display: block;
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fdba74;
+        }
+
+        .live-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dc2626;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.35); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-top: 14px;
+            display: none;
+            border-radius: 12px;
+        }
+
+        .result-card {
+            background: #ffffff;
+        }
+
+        .result-header h3 {
+            margin: 0 0 16px;
+            color: #1256bc;
+            font-size: 20px;
+        }
+
+        .result-grid {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            background: #f8fbff;
+            border: 1px solid #dce7f8;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .result-item .label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .result-item .value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1f2937;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .tips-section {
+            margin-top: 14px;
+        }
+
+        .tips-section h4 {
+            margin: 0 0 12px;
+            color: #1256bc;
+            font-size: 17px;
+        }
+
+        .tips-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .tip {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid #dde7f7;
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: #374151;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .feedback-message {
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feedback-success {
+            color: #166534;
+        }
+
+        .feedback-error {
+            color: #991b1b;
+        }
+
+        @media (max-width: 900px) {
+            .page-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-section {
+                padding: 24px 20px 16px;
+            }
+
+            .content {
+                padding: 22px 20px 24px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .top-section h2 {
+                font-size: 23px;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            .button-row button {
+                width: 100%;
+            }
+
+            .input-card,
+            .result-panel,
+            .feedback-panel {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <h2>Voice Emotion Recognition</h2>
+            <p>
+                Upload an audio file or use your microphone for live voice emotion detection.
+                Analyze voice-based emotion with the same professional interface style used in the text and image pages.
+            </p>
+        </div>
+
+        <div class="content">
+            <div class="page-grid">
+                <div>
+                    <div class="input-card">
+                        <h3 class="section-title">Audio Input Options</h3>
+                        <p class="section-subtitle">
+                            Choose one of the methods below to detect emotion from voice input.
+                        </p>
+
+                        <div class="option-box">
+                            <h4>Upload Audio File</h4>
+                            <p>Select a supported audio file and analyze the emotion from the uploaded clip.</p>
+                            <input type="file" id="audioFile" class="file-input" accept=".wav,.mp3,.ogg,.m4a,.webm" />
+                            <div class="button-row">
+                                <button class="btn-primary" onclick="uploadAudio()">Predict from File</button>
+                            </div>
+                        </div>
+
+                        <div class="option-box">
+                            <h4>Real-Time Microphone Detection</h4>
+                            <p>
+                                Start recording from your microphone to perform live voice emotion detection
+                                and analyze the recorded audio.
+                            </p>
+
+                            <div class="button-row">
+                                <button class="btn-success" id="startRecordBtn">Start Live Detection</button>
+                                <button class="btn-danger" id="stopRecordBtn" disabled>Stop Detection</button>
+                                <button class="btn-secondary" id="analyzeRecordedBtn" disabled>Analyze Recorded Audio</button>
+                            </div>
+
+                            <div class="live-indicator" id="liveIndicator">
+                                <span class="live-dot"></span>
+                                <span>Live microphone detection is active</span>
+                            </div>
+
+                            <audio id="audioPlayback" class="audio-player" controls></audio>
+                        </div>
+
+                        <div id="statusBox" class="status-box"></div>
+                    </div>
+
+                    <div class="feedback-panel">
+                        <h3 class="section-title">User Feedback</h3>
+                        <p class="section-subtitle">
+                            Users can rate their experience and give feedback about the voice emotion recognition result.
+                        </p>
+
+                        <label class="feedback-label" for="feedbackRating">Rate Your Experience</label>
+                        <select id="feedbackRating" class="feedback-select">
+                            <option value="">Select rating</option>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="1">1 - Poor</option>
+                        </select>
+
+                        <label class="feedback-label" for="feedbackText">Your Feedback</label>
+                        <textarea
+                            id="feedbackText"
+                            class="feedback-textarea"
+                            placeholder="Write your feedback here..."
+                        ></textarea>
+
+                        <div class="button-row">
+                            <button class="btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+                        </div>
+
+                        <div id="feedbackMessage" class="feedback-message"></div>
+                    </div>
+                </div>
+
+                <div class="result-panel">
+                    <div class="result-header">
+                        <h3>Prediction Result</h3>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="label">Detected Emotion</span>
+                            <span class="value" id="emotion" data-emotion-key="">Waiting for analysis...</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="label">Confidence Score</span>
+                            <span class="value" id="confidence">--</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="label">Input Type</span>
+                            <span class="value" id="inputType">--</span>
+                        </div>
+                    </div>
+
+                    <div class="tips-section">
+                        <h4>Tips for Better Results</h4>
+                        <div class="tips-list">
+                            <div class="tip">
+                                Speak clearly in a quiet environment for more accurate emotion prediction.
+                            </div>
+                            <div class="tip">
+                                Allow microphone access when using live detection from your browser.
+                            </div>
+                            <div class="tip">
+                                Keep audio samples a few seconds long and avoid strong background noise.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statusBox = document.getElementById("statusBox");
+        const emotionEl = document.getElementById("emotion");
+        const confidenceEl = document.getElementById("confidence");
+        const inputTypeEl = document.getElementById("inputType");
+        const startRecordBtn = document.getElementById("startRecordBtn");
+        const stopRecordBtn = document.getElementById("stopRecordBtn");
+        const analyzeRecordedBtn = document.getElementById("analyzeRecordedBtn");
+        const audioPlayback = document.getElementById("audioPlayback");
+        const liveIndicator = document.getElementById("liveIndicator");
+        const feedbackMessage = document.getElementById("feedbackMessage");
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedBlob = null;
+        let currentStream = null;
+
+        function showStatus(message, type = "info") {
+            statusBox.textContent = message;
+            statusBox.className = "status-box";
+
+            if (type === "info") statusBox.classList.add("status-info");
+            if (type === "success") statusBox.classList.add("status-success");
+            if (type === "error") statusBox.classList.add("status-error");
+            if (type === "warning") statusBox.classList.add("status-warning");
+        }
+
+        function updateResult(emotion, confidence, inputType, emotionKey = "") {
+            emotionEl.textContent = emotion || "Not available";
+            confidenceEl.textContent = confidence || "--";
+            inputTypeEl.textContent = inputType || "--";
+            emotionEl.dataset.emotionKey = emotionKey || emotion || "";
+        }
+
+        async function uploadAudio() {
+            const fileInput = document.getElementById("audioFile");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showStatus("Please select an audio file first.", "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("audio", file);
+
+            showStatus("Analyzing uploaded audio file...", "info");
+            updateResult("Processing...", "--", "Uploaded File", "");
+
+            try {
+                const response = await fetch("/predict_voice_emotion", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showStatus(data.error || "Failed to analyze uploaded audio.", "error");
+                    updateResult("Prediction failed", "--", "Uploaded File", "");
+                    return;
+                }
+
+                updateResult(
+                    data.emotion || "Unknown",
+                    data.confidence || "--",
+                    "Uploaded File",
+                    data.emotion_key || data.emotion || ""
+                );
+                showStatus("Uploaded audio analyzed successfully.", "success");
+            } catch (error) {
+                console.error(error);
+                showStatus("Failed to connect to the server.", "error");
+                updateResult("Server error", "--", "Uploaded File", "");
+            }
+        }
+
+        async function startLiveRecording() {
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                audioChunks = [];
+                recordedBlob = null;
+
+                const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+                    ? "audio/webm"
+                    : "audio/ogg";
+
+                mediaRecorder = new MediaRecorder(currentStream, { mimeType });
+
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data && event.data.size > 0) {
+                        audioChunks.push(event.data);
+                        await sendLiveChunk(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, { type: mimeType });
+                    const audioURL = URL.createObjectURL(recordedBlob);
+                    audioPlayback.src = audioURL;
+                    audioPlayback.style.display = "block";
+                    analyzeRecordedBtn.disabled = false;
+
+                    if (currentStream) {
+                        currentStream.getTracks().forEach(track => track.stop());
+                    }
+                };
+
+                mediaRecorder.start(3000);
+
+                startRecordBtn.disabled = true;
+                stopRecordBtn.disabled = false;
+                analyzeRecordedBtn.disabled = true;
+                liveIndicator.style.display = "flex";
+
+                showStatus("Live voice detection started. Speak clearly into your microphone.", "info");
+                updateResult("Listening...", "--", "Live Microphone", "");
+            } catch (error) {
+                console.error(error);
+                showStatus("Could not access microphone. Please allow microphone permission.", "error");
+            }
+        }
+
+        function stopLiveRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+
+            startRecordBtn.disabled = false;
+            stopRecordBtn.disabled = true;
+            liveIndicator.style.display = "none";
+
+            showStatus("Recording stopped. You can now analyze the full recorded audio.", "warning");
+        }
+
+        async function sendLiveChunk(chunkBlob) {
+            try {
+                const formData = new FormData();
+                formData.append("audio", chunkBlob, "live_chunk.webm");
+
+                const response = await fetch("/predict_voice_emotion_realtime", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    updateResult(
+                        data.emotion || "Unknown",
+                        data.confidence || "--",
+                        "Live Microphone",
+                        data.emotion_key || data.emotion || ""
+                    );
+                    showStatus("Live emotion updated from microphone input.", "success");
+                }
+            } catch (error) {
+                console.error("Live chunk error:", error);
+            }
+        }
+
+        async function analyzeRecordedAudio() {
+            if (!recordedBlob) {
+                showStatus("No recorded audio available to analyze.", "error");
+                return;
+            }
+
+            showStatus("Analyzing recorded microphone audio...", "info");
+            updateResult("Processing...", "--", "Recorded Microphone Audio", "");
+
+            try {
+                const formData = new FormData();
+                formData.append("audio", recordedBlob, "recorded_audio.webm");
+
+                const response = await fetch("/predict_voice_emotion", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showStatus(data.error || "Failed to analyze recorded audio.", "error");
+                    updateResult("Prediction failed", "--", "Recorded Microphone Audio", "");
+                    return;
+                }
+
+                updateResult(
+                    data.emotion || "Unknown",
+                    data.confidence || "--",
+                    "Recorded Microphone Audio",
+                    data.emotion_key || data.emotion || ""
+                );
+                showStatus("Recorded microphone audio analyzed successfully.", "success");
+            } catch (error) {
+                console.error(error);
+                showStatus("Failed to connect to the server.", "error");
+                updateResult("Server error", "--", "Recorded Microphone Audio", "");
+            }
+        }
+
+        async function submitFeedback() {
+            const rating = document.getElementById("feedbackRating").value;
+            const feedback = document.getElementById("feedbackText").value.trim();
+            const emotion = emotionEl.dataset.emotionKey || "";
+            const inputType = inputTypeEl.textContent.trim();
+
+            feedbackMessage.textContent = "";
+            feedbackMessage.className = "feedback-message";
+
+            if (!rating || !feedback) {
+                feedbackMessage.textContent = "Please select a rating and enter your feedback.";
+                feedbackMessage.classList.add("feedback-error");
+                return;
+            }
+
+            try {
+                const response = await fetch("/submit_feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        rating: rating,
+                        feedback: feedback,
+                        emotion: emotion,
+                        input_type: inputType,
+                        module: "voice_emotion_recognition"
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    feedbackMessage.textContent = data.error || "Failed to submit feedback.";
+                    feedbackMessage.classList.add("feedback-error");
+                    return;
+                }
+
+                feedbackMessage.textContent = "Thank you! Your feedback has been submitted successfully.";
+                feedbackMessage.classList.add("feedback-success");
+
+                document.getElementById("feedbackRating").value = "";
+                document.getElementById("feedbackText").value = "";
+            } catch (error) {
+                console.error(error);
+                feedbackMessage.textContent = "Failed to connect to the server.";
+                feedbackMessage.classList.add("feedback-error");
+            }
+        }
+
+        startRecordBtn.addEventListener("click", startLiveRecording);
+        stopRecordBtn.addEventListener("click", stopLiveRecording);
+        analyzeRecordedBtn.addEventListener("click", analyzeRecordedAudio);
+    </script>
+</body>
+</html>

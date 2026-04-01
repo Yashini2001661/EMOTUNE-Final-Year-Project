@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMOTUNE | Emotion-Based Music Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            width: 100%;
+            padding: 18px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 0.96rem;
+            font-weight: 500;
+            transition: 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #dbeafe;
+        }
+
+        .login-btn {
+            padding: 10px 20px;
+            background: #ffffff;
+            color: #1e3a8a !important;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .login-btn:hover {
+            background: #dbeafe;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.96rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dropdown-toggle:hover {
+            color: #dbeafe;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 38px;
+            left: 0;
+            min-width: 210px;
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+            z-index: 999;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 14px 18px;
+            margin-left: 0;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(255, 255, 255, 0.10);
+            color: #dbeafe;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 60px 40px;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.2rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero-text p {
+            font-size: 1.08rem;
+            line-height: 1.8;
+            color: #dbeafe;
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: 0.3s ease;
+            display: inline-block;
+        }
+
+        .primary-btn {
+            background: #ffffff;
+            color: #1e3a8a;
+        }
+
+        .primary-btn:hover {
+            background: #dbeafe;
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            transform: translateY(-2px);
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 28px;
+            padding: 30px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .hero-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 16px 18px;
+            border-radius: 18px;
+        }
+
+        .feature-item h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .feature-item p {
+            font-size: 0.93rem;
+            color: #dbeafe;
+            line-height: 1.6;
+        }
+
+        .info-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 60px 60px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card h3 {
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+        }
+
+        .info-card p {
+            color: #dbeafe;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 18px 20px;
+            font-size: 0.92rem;
+            color: #dbeafe;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 992px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .hero {
+                padding: 50px 20px 30px;
+            }
+
+            .info-section {
+                padding: 0 20px 40px;
+            }
+
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .hero-text p {
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .dropdown-menu {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">EMOTUNE</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="profile.html">Profile</a>
+            <a href="settings.html">Settings</a>
+
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle">Recommendations ▾</a>
+                <div class="dropdown-menu">
+                    <a href="text-emotion.html">Text</a>
+                    <a href="image-emotion.html">Image</a>
+                    <a href="voice-emotion.html">Voice</a>
+                </div>
+            </div>
+            <a href="auth.html" class="login-btn">Login</a>
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-text">
+                <h1>Feel Your Music, Powered by Emotion</h1>
+                <p>
+                    EMOTUNE is an intelligent emotion-based music recommendation system that
+                    understands your feelings through facial expressions, voice tone, and text input.
+                    Experience a smarter and more personalized way to discover music that truly matches your mood.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="text-emotion.html" class="primary-btn">Get Started</a>
+                    <a href="about.html" class="secondary-btn">Learn More</a>
+                </div>
+            </div>
+
+            <div class="hero-card">
+                <h2>How EMOTUNE Works</h2>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h3>Voice Emotion Detection</h3>
+                        <p>Analyze tone and speech patterns to understand your emotional state.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Face Emotion Detection</h3>
+                        <p>Detect mood through facial expressions using image-based emotion analysis, supporting both image upload and real-time webcam capture.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Text Emotion Detection</h3>
+                        <p>Understand emotions from written text and provide suitable music suggestions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="info-section">
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Smart Recommendations</h3>
+                <p>
+                    Receive music recommendations that align with your feelings and create a more personal listening experience.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>Modern User Experience</h3>
+                <p>
+                    Enjoy a clean, attractive, and user-friendly interface designed for smooth navigation and easy interaction.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>Multiple Detection Methods</h3>
+                <p>
+                    Choose from voice, face, or text emotion detection methods based on your preference and convenience.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".dropdown-toggle");
+        const menu = document.querySelector(".dropdown-menu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest(".dropdown")) {
+                menu.style.display = "none";
+            }
+        });
+    });
+</script>
+
+    <div class="footer">
+        © 2026 EMOTUNE | Emotion-Based Music Recommendation System
+    </div>
+
+</body>
+</html>

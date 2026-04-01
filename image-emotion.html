@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Emotion Recognition</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f8fbff 50%, #edf3ff 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 30px 16px;
+        }
+
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid #e5ecf8;
+            border-radius: 22px;
+            box-shadow: 0 18px 45px rgba(18, 86, 188, 0.12);
+            overflow: hidden;
+        }
+
+        .top-section {
+            padding: 30px 30px 18px;
+            background: linear-gradient(135deg, #1256bc 0%, #1b6de0 100%);
+            color: #fff;
+        }
+
+        .top-section h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .top-section p {
+            margin: 10px 0 0;
+            font-size: 15px;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .content {
+            padding: 26px 30px 30px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 180px;
+            border: 1px solid #d7e3fb;
+            background: #f5f9ff;
+            color: #1256bc;
+            padding: 14px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .mode-btn:hover {
+            background: #eaf2ff;
+            transform: translateY(-1px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #1256bc 0%, #0d47a1 100%);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 10px 24px rgba(18, 86, 188, 0.22);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .upload-box,
+        .feedback-card,
+        .preview-card,
+        .tips-card,
+        .recommend-card {
+            background: #ffffff;
+            border: 1px solid #e4ebf7;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .upload-box {
+            background: #f8fbff;
+            border: 1px dashed #bfd4fb;
+            margin-bottom: 18px;
+        }
+
+        .upload-label,
+        .feedback-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1256bc;
+            margin-bottom: 10px;
+        }
+
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #d9e4f5;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #374151;
+            outline: none;
+        }
+
+        select:focus,
+        textarea:focus,
+        input[type="file"]:focus {
+            border-color: #1256bc;
+            box-shadow: 0 0 0 4px rgba(18, 86, 188, 0.12);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .webcam-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 13px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #1256bc 0%, #0d47a1 100%);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(18, 86, 188, 0.2);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(18, 86, 188, 0.26);
+        }
+
+        .secondary-btn {
+            background: #eef4ff;
+            color: #1256bc;
+            border: 1px solid #c8dafb;
+        }
+
+        .secondary-btn:hover {
+            background: #e2edff;
+        }
+
+        .preview-box {
+            margin-top: 6px;
+        }
+
+        .preview-title,
+        .feedback-title,
+        .tips-title,
+        .recommend-title,
+        .platform-title {
+            margin: 0 0 14px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1256bc;
+        }
+
+        .media-frame {
+            width: 100%;
+            max-width: 480px;
+            height: 320px;
+            margin: 0 auto;
+            border: 1px solid #d9e4f5;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f8fbff 0%, #edf4ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .media-frame video,
+        .media-frame img,
+        .media-frame canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            background: #f3f7ff;
+        }
+
+        .face-guide {
+            position: absolute;
+            width: 180px;
+            height: 220px;
+            border: 2px dashed rgba(18, 86, 188, 0.55);
+            border-radius: 50% / 45%;
+            pointer-events: none;
+            display: none;
+        }
+
+        .placeholder-text {
+            color: #6b7280;
+            font-size: 14px;
+            text-align: center;
+            padding: 16px;
+            line-height: 1.6;
+        }
+
+        .main-action,
+        .feedback-action,
+        .recommendation-action {
+            text-align: center;
+            margin-top: 22px;
+        }
+
+        .predict-btn,
+        .feedback-btn,
+        .recommend-btn {
+            min-width: 220px;
+            padding: 14px 22px;
+            font-size: 16px;
+        }
+
+        .loading {
+            margin-top: 18px;
+            text-align: center;
+            color: #1256bc;
+            font-weight: 700;
+            display: none;
+            font-size: 15px;
+        }
+
+        .error {
+            margin-top: 16px;
+            text-align: center;
+            color: #dc2626;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .success {
+            margin-top: 14px;
+            text-align: center;
+            color: #16a34a;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .info {
+            margin-top: 14px;
+            text-align: center;
+            color: #1d4ed8;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .result {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .result-header {
+            margin-bottom: 14px;
+        }
+
+        .result-header h3 {
+            margin: 0;
+            color: #1256bc;
+            font-size: 20px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .result-item {
+            background: #f8fbff;
+            border: 1px solid #dce7f8;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .result-item .label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .result-item .value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .feedback-wrapper,
+        .tips-wrapper,
+        .recommend-wrapper {
+            margin-top: 24px;
+        }
+
+        .feedback-group {
+            margin-bottom: 16px;
+        }
+
+        .tips-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #374151;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .recommend-wrapper {
+            display: none;
+        }
+
+        .recommend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .music-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            background: #f8fbff;
+            border: 1px solid #dce7f8;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .music-item img {
+            width: 88px;
+            height: 88px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #eef4ff;
+        }
+
+        .music-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .music-content h4 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            color: #1f2937;
+        }
+
+        .music-content p {
+            margin: 0 0 8px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .music-link {
+            display: inline-block;
+            text-decoration: none;
+            color: #1256bc;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .music-link:hover {
+            text-decoration: underline;
+        }
+
+        .recommend-error {
+            margin-top: 12px;
+            color: #b45309;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .empty-text {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        @media (max-width: 900px) {
+            .recommend-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-section {
+                padding: 24px 20px 16px;
+            }
+
+            .content {
+                padding: 22px 20px 24px;
+            }
+
+            .media-frame {
+                height: 260px;
+            }
+
+            .face-guide {
+                width: 140px;
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .mode-buttons,
+            .webcam-controls {
+                flex-direction: column;
+            }
+
+            .mode-btn,
+            .webcam-controls button,
+            .predict-btn,
+            .feedback-btn,
+            .recommend-btn {
+                width: 100%;
+            }
+
+            .top-section h2 {
+                font-size: 23px;
+            }
+
+            .music-item {
+                flex-direction: column;
+            }
+
+            .music-item img {
+                width: 100%;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <h2>Image Emotion Recognition</h2>
+            <p>Upload a photo or capture one from your webcam to detect facial emotion and get smarter music recommendations.</p>
+        </div>
+
+        <div class="content">
+            <div class="mode-buttons">
+                <button type="button" class="mode-btn active" id="uploadModeBtn">Upload Photo</button>
+                <button type="button" class="mode-btn" id="webcamModeBtn">Capture via Webcam</button>
+            </div>
+
+            <div class="section active" id="uploadSection">
+                <div class="upload-box">
+                    <label for="imageFile" class="upload-label">Choose an image</label>
+                    <input type="file" id="imageFile" accept="image/png, image/jpeg, image/jpg, image/webp" />
+                </div>
+            </div>
+
+            <div class="section" id="webcamSection">
+                <div class="webcam-controls">
+                    <button type="button" id="startCameraBtn" class="primary-btn">Start Camera</button>
+                    <button type="button" id="captureBtn" class="primary-btn">Capture Photo</button>
+                    <button type="button" id="retakeBtn" class="secondary-btn">Retake</button>
+                </div>
+                <div class="info" id="cameraInfo">Keep your face centered, bright, and clearly visible.</div>
+            </div>
+
+            <div class="preview-box">
+                <div class="preview-card">
+                    <h3 class="preview-title">Preview</h3>
+                    <div class="media-frame">
+                        <span class="placeholder-text" id="placeholderText">
+                            Upload an image or capture a live photo from your webcam.<br>
+                            Your selected image will appear here.
+                        </span>
+                        <video id="webcam" autoplay playsinline muted></video>
+                        <img id="previewImage" alt="Image Preview" />
+                        <canvas id="captureCanvas"></canvas>
+                        <div class="face-guide" id="faceGuide"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-action">
+                <button type="button" class="primary-btn predict-btn" onclick="predictImageEmotion()">Predict Emotion</button>
+            </div>
+
+            <div class="loading" id="loading">Analyzing image emotion...</div>
+            <div class="error" id="errorMsg"></div>
+
+            <div class="result" id="resultBox">
+                <div class="result-header">
+                    <h3>Prediction Result</h3>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        <span class="label">Detected Emotion</span>
+                        <span class="value" id="emotion" data-emotion-key=""></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Confidence</span>
+                        <span class="value" id="confidence">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Status</span>
+                        <span class="value" id="status">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Detector</span>
+                        <span class="value" id="detectorUsed">-</span>
+                    </div>
+                </div>
+
+                <div class="recommendation-action">
+                    <button type="button" class="primary-btn recommend-btn" id="recommendBtn" onclick="getRecommendation()">
+                        Get Recommendation
+                    </button>
+                </div>
+            </div>
+
+            <div class="recommend-wrapper" id="recommendationBox">
+                <div class="recommend-card">
+                    <h3 class="recommend-title">Music Recommendations</h3>
+                    <div class="recommend-grid">
+                        <div>
+                            <h4 class="platform-title">Spotify</h4>
+                            <div class="items-grid" id="spotifyList"></div>
+                        </div>
+                        <div>
+                            <h4 class="platform-title">YouTube</h4>
+                            <div class="items-grid" id="youtubeList"></div>
+                        </div>
+                    </div>
+                    <div class="recommend-error" id="recommendError"></div>
+                </div>
+            </div>
+
+            <div class="tips-wrapper">
+                <div class="tips-card">
+                    <h3 class="tips-title">Better Results Tips</h3>
+                    <ol class="tips-list">
+                        <li>Use a photo with one face only.</li>
+                        <li>Look straight at the camera.</li>
+                        <li>Use good lighting on the face.</li>
+                        <li>Avoid sunglasses, masks, or heavy shadows.</li>
+                        <li>Predict the emotion before getting song recommendations.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="feedback-wrapper">
+                <div class="feedback-card">
+                    <h3 class="feedback-title">User Feedback</h3>
+
+                    <div class="feedback-group">
+                        <label class="feedback-label" for="feedbackRating">Rate Your Experience</label>
+                        <select id="feedbackRating">
+                            <option value="">Select rating</option>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="1">1 - Poor</option>
+                        </select>
+                    </div>
+
+                    <div class="feedback-group">
+                        <label class="feedback-label" for="feedbackText">Your Feedback</label>
+                        <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                    </div>
+
+                    <div class="feedback-action">
+                        <button type="button" class="primary-btn feedback-btn" onclick="submitFeedback()">Submit Feedback</button>
+                    </div>
+
+                    <div class="error" id="feedbackError"></div>
+                    <div class="success" id="feedbackSuccess"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadModeBtn = document.getElementById("uploadModeBtn");
+        const webcamModeBtn = document.getElementById("webcamModeBtn");
+        const uploadSection = document.getElementById("uploadSection");
+        const webcamSection = document.getElementById("webcamSection");
+
+        const imageInput = document.getElementById("imageFile");
+        const previewImage = document.getElementById("previewImage");
+        const webcam = document.getElementById("webcam");
+        const canvas = document.getElementById("captureCanvas");
+        const placeholderText = document.getElementById("placeholderText");
+        const faceGuide = document.getElementById("faceGuide");
+
+        const startCameraBtn = document.getElementById("startCameraBtn");
+        const captureBtn = document.getElementById("captureBtn");
+        const retakeBtn = document.getElementById("retakeBtn");
+
+        const loading = document.getElementById("loading");
+        const errorMsg = document.getElementById("errorMsg");
+        const resultBox = document.getElementById("resultBox");
+        const recommendationBox = document.getElementById("recommendationBox");
+        const spotifyList = document.getElementById("spotifyList");
+        const youtubeList = document.getElementById("youtubeList");
+        const recommendError = document.getElementById("recommendError");
+
+        let stream = null;
+        let capturedBlob = null;
+        let currentMode = "upload";
+
+        function resetMessages() {
+            errorMsg.textContent = "";
+            resultBox.style.display = "none";
+            recommendationBox.style.display = "none";
+            recommendError.textContent = "";
+            spotifyList.innerHTML = "";
+            youtubeList.innerHTML = "";
+        }
+
+        function showOnly(elementToShow) {
+            [previewImage, webcam, canvas].forEach(el => {
+                el.style.display = "none";
+            });
+
+            if (elementToShow) {
+                elementToShow.style.display = "block";
+                placeholderText.style.display = "none";
+            } else {
+                placeholderText.style.display = "block";
+            }
+
+            faceGuide.style.display = (currentMode === "webcam" && elementToShow === webcam) ? "block" : "none";
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            webcam.srcObject = null;
+            faceGuide.style.display = "none";
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            resetMessages();
+            capturedBlob = null;
+
+            uploadModeBtn.classList.remove("active");
+            webcamModeBtn.classList.remove("active");
+            uploadSection.classList.remove("active");
+            webcamSection.classList.remove("active");
+
+            if (mode === "upload") {
+                uploadModeBtn.classList.add("active");
+                uploadSection.classList.add("active");
+                stopCamera();
+
+                if (imageInput.files[0]) {
+                    showOnly(previewImage);
+                } else {
+                    previewImage.src = "";
+                    showOnly(null);
+                }
+            } else {
+                webcamModeBtn.classList.add("active");
+                webcamSection.classList.add("active");
+                imageInput.value = "";
+                previewImage.src = "";
+                showOnly(null);
+            }
+        }
+
+        uploadModeBtn.addEventListener("click", () => switchMode("upload"));
+        webcamModeBtn.addEventListener("click", () => switchMode("webcam"));
+
+        imageInput.addEventListener("change", function () {
+            resetMessages();
+            capturedBlob = null;
+
+            const file = this.files[0];
+            if (!file) {
+                previewImage.src = "";
+                showOnly(null);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                previewImage.onload = function () {
+                    showOnly(previewImage);
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+        async function startCamera() {
+            resetMessages();
+
+            try {
+                stopCamera();
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "user",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+
+                webcam.srcObject = stream;
+                await webcam.play();
+                capturedBlob = null;
+                showOnly(webcam);
+            } catch (error) {
+                errorMsg.textContent = "Unable to access webcam.";
+                console.error(error);
+            }
+        }
+
+        async function capturePhoto() {
+            errorMsg.textContent = "";
+
+            if (!stream) {
+                errorMsg.textContent = "Please start the camera first.";
+                return;
+            }
+
+            const width = webcam.videoWidth;
+            const height = webcam.videoHeight;
+
+            if (!width || !height) {
+                errorMsg.textContent = "Webcam is not ready yet.";
+                return;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(webcam, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    errorMsg.textContent = "Failed to capture image.";
+                    return;
+                }
+                capturedBlob = blob;
+                showOnly(canvas);
+            }, "image/jpeg", 0.98);
+        }
+
+        function retakePhoto() {
+            errorMsg.textContent = "";
+            capturedBlob = null;
+
+            if (stream) {
+                showOnly(webcam);
+            } else {
+                showOnly(null);
+            }
+        }
+
+        function createSpotifyCard(song) {
+            const image = song.image || "";
+            const preview = song.preview_url
+                ? `<a class="music-link" href="${song.preview_url}" target="_blank" rel="noopener noreferrer">Preview</a>`
+                : "";
+
+            return `
+                <div class="music-item">
+                    <img src="${image}" alt="Spotify cover" onerror="this.style.display='none'">
+                    <div class="music-content">
+                        <h4>${escapeHtml(song.track_name || "Untitled Track")}</h4>
+                        <p><strong>Artist:</strong> ${escapeHtml(song.artist || "-")}</p>
+                        <p><strong>Album:</strong> ${escapeHtml(song.album || "-")}</p>
+                        <a class="music-link" href="${song.spotify_url}" target="_blank" rel="noopener noreferrer">Open in Spotify</a>
+                        ${preview ? ` | ${preview}` : ""}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createYouTubeCard(video) {
+            const image = video.image || "";
+            return `
+                <div class="music-item">
+                    <img src="${image}" alt="YouTube thumbnail" onerror="this.style.display='none'">
+                    <div class="music-content">
+                        <h4>${escapeHtml(video.title || "Untitled Video")}</h4>
+                        <p><strong>Channel:</strong> ${escapeHtml(video.channel || "-")}</p>
+                        <a class="music-link" href="${video.youtube_url}" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        startCameraBtn.addEventListener("click", startCamera);
+        captureBtn.addEventListener("click", capturePhoto);
+        retakeBtn.addEventListener("click", retakePhoto);
+
+        async function predictImageEmotion() {
+            resetMessages();
+            loading.style.display = "block";
+
+            const formData = new FormData();
+
+            if (currentMode === "upload") {
+                const file = imageInput.files[0];
+
+                if (!file) {
+                    loading.style.display = "none";
+                    errorMsg.textContent = "Please select an image.";
+                    return;
+                }
+
+                formData.append("image", file);
+            } else {
+                if (!capturedBlob) {
+                    loading.style.display = "none";
+                    errorMsg.textContent = "Please capture a photo from the webcam.";
+                    return;
+                }
+
+                formData.append("image", capturedBlob, "webcam_capture.jpg");
+            }
+
+            try {
+                const response = await fetch("/predict_image_emotion", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+                loading.style.display = "none";
+
+                if (!response.ok) {
+                    errorMsg.textContent = data.error || "Something went wrong.";
+                    return;
+                }
+
+                document.getElementById("emotion").textContent = data.emotion || "-";
+                document.getElementById("emotion").dataset.emotionKey = data.emotion_key || data.emotion || "";
+                document.getElementById("confidence").textContent = data.confidence || "-";
+                document.getElementById("status").textContent = data.status || "-";
+                document.getElementById("detectorUsed").textContent = data.detector_used || "-";
+
+                resultBox.style.display = "block";
+            } catch (error) {
+                loading.style.display = "none";
+                errorMsg.textContent = "Failed to connect to server.";
+                console.error(error);
+            }
+        }
+
+        async function getRecommendation() {
+            errorMsg.textContent = "";
+            recommendError.textContent = "";
+            spotifyList.innerHTML = "";
+            youtubeList.innerHTML = "";
+
+            const detectedEmotion =
+                document.getElementById("emotion").dataset.emotionKey ||
+                document.getElementById("emotion").textContent.trim();
+
+            if (!detectedEmotion || detectedEmotion === "-") {
+                errorMsg.textContent = "Please predict an emotion first.";
+                return;
+            }
+
+            loading.style.display = "block";
+
+            try {
+                const response = await fetch("/recommend_music", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        emotion: detectedEmotion
+                    })
+                });
+
+                const data = await response.json();
+                loading.style.display = "none";
+
+                if (!response.ok) {
+                    errorMsg.textContent = data.error || "Failed to get recommendations.";
+                    return;
+                }
+
+                const spotifyItems = Array.isArray(data.spotify_recommendations) ? data.spotify_recommendations : [];
+                const youtubeItems = Array.isArray(data.youtube_recommendations) ? data.youtube_recommendations : [];
+
+                if (spotifyItems.length > 0) {
+                    spotifyList.innerHTML = spotifyItems.map(createSpotifyCard).join("");
+                } else {
+                    spotifyList.innerHTML = `<p class="empty-text">No Spotify recommendations found.</p>`;
+                }
+
+                if (youtubeItems.length > 0) {
+                    youtubeList.innerHTML = youtubeItems.map(createYouTubeCard).join("");
+                } else {
+                    youtubeList.innerHTML = `<p class="empty-text">No YouTube recommendations found.</p>`;
+                }
+
+                if (Array.isArray(data.errors) && data.errors.length > 0) {
+                    recommendError.textContent = data.errors.join(" | ");
+                }
+
+                recommendationBox.style.display = "block";
+                recommendationBox.scrollIntoView({ behavior: "smooth", block: "start" });
+
+            } catch (error) {
+                loading.style.display = "none";
+                errorMsg.textContent = "Failed to connect to server.";
+                console.error(error);
+            }
+        }
+
+        async function submitFeedback() {
+            const rating = document.getElementById("feedbackRating").value;
+            const feedback = document.getElementById("feedbackText").value.trim();
+            const emotion = document.getElementById("emotion").dataset.emotionKey || "";
+            const feedbackError = document.getElementById("feedbackError");
+            const feedbackSuccess = document.getElementById("feedbackSuccess");
+
+            feedbackError.textContent = "";
+            feedbackSuccess.textContent = "";
+
+            if (!rating || !feedback) {
+                feedbackError.textContent = "Please select a rating and enter your feedback.";
+                return;
+            }
+
+            try {
+                const response = await fetch("/submit_feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        rating: rating,
+                        feedback: feedback,
+                        emotion: emotion,
+                        module: "image_emotion_recognition"
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    feedbackError.textContent = data.error || "Failed to submit feedback.";
+                    return;
+                }
+
+                feedbackSuccess.textContent = "Thank you! Your feedback has been submitted successfully.";
+                document.getElementById("feedbackRating").value = "";
+                document.getElementById("feedbackText").value = "";
+            } catch (error) {
+                feedbackError.textContent = "Failed to connect to server.";
+                console.error(error);
+            }
+        }
+
+        window.addEventListener("beforeunload", stopCamera);
+    </script>
+</body>
+</html>
